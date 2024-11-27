@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import BlogPostPage from './pages/BlogPostPage';
 
 const useInView = (ref) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -39,11 +41,11 @@ const Header = () => {
       isScrolled ? 'bg-black/90 backdrop-blur-sm py-4' : 'bg-transparent py-6'
     }`}>
       <nav className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-        <a href="/" className="text-white text-xl font-bold">AL</a>
+        <Link to="/" className="text-white text-xl font-bold">AL</Link>
         <div className="flex gap-8 text-gray-300">
-          <a href="#" className="hover:text-white transition-colors">About</a>
-          <a href="#" className="hover:text-white transition-colors">Blog</a>
-          <a href="#" className="hover:text-white transition-colors">Contact</a>
+          <Link to="#" className="hover:text-white transition-colors">About</Link>
+          <Link to="#" className="hover:text-white transition-colors">Blog</Link>
+          <Link to="#" className="hover:text-white transition-colors">Contact</Link>
         </div>
       </nav>
     </header>
@@ -71,8 +73,17 @@ const BlogPost = ({ post }) => {
           ),
         }}
       >
-        {post.body}
+        {/* Show preview of the content */}
+        {post.body.substring(0, 300)}...
       </ReactMarkdown>
+      <div className="mt-6">
+        <Link 
+          to={`/blog/${post.id}`}
+          className="inline-block px-6 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          Read More
+        </Link>
+      </div>
     </article>
   );
 };
@@ -108,12 +119,11 @@ const Newsletter = () => {
   );
 };
 
-const HomePage = () => {
+const MainContent = () => {
   const [posts, setPosts] = useState([]);
   const postsRef = useRef(null);
   const isPostsVisible = useInView(postsRef);
 
-  // Fetch posts directly here
   const loadPosts = async () => {
     try {
       const response = await fetch('/.netlify/functions/getPosts');
@@ -127,7 +137,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    loadPosts();  // Directly call the function here
+    loadPosts();
   }, []);
 
   return (
@@ -216,4 +226,15 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainContent />} />
+        <Route path="/blog/:id" element={<BlogPostPage />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
