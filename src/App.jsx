@@ -113,20 +113,21 @@ const HomePage = () => {
   const postsRef = useRef(null);
   const isPostsVisible = useInView(postsRef);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch('/.netlify/functions/getPosts');
-        if (!response.ok) throw new Error('Failed to fetch posts');
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-        setPosts([]);
-      }
-    };
+  // Fetch posts directly here
+  const loadPosts = async () => {
+    try {
+      const response = await fetch('/.netlify/functions/getPosts');
+      if (!response.ok) throw new Error('Failed to fetch posts');
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      setPosts([]);
+    }
+  };
 
-    fetchPosts();
+  useEffect(() => {
+    loadPosts();  // Directly call the function here
   }, []);
 
   return (
