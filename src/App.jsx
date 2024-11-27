@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
-// Internal hook for animation
 const useInView = (ref) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -43,11 +43,37 @@ const Header = () => {
         <div className="flex gap-8 text-gray-300">
           <a href="#" className="hover:text-white transition-colors">About</a>
           <a href="#" className="hover:text-white transition-colors">Blog</a>
-          <a href="#" className="hover:text-white transition-colors">Categories</a>
           <a href="#" className="hover:text-white transition-colors">Contact</a>
         </div>
       </nav>
     </header>
+  );
+};
+
+const BlogPost = ({ post }) => {
+  return (
+    <article className="bg-gray-900 rounded-lg overflow-hidden p-8">
+      <div className="text-sm text-gray-400 mb-4">
+        {post.date}
+      </div>
+      <ReactMarkdown
+        className="prose prose-invert max-w-none"
+        components={{
+          h1: ({children}) => <h1 className="text-4xl font-bold mb-8 text-white">{children}</h1>,
+          h2: ({children}) => <h2 className="text-2xl font-bold mt-8 mb-4 text-white">{children}</h2>,
+          p: ({children}) => <p className="text-gray-300 mb-4 text-lg">{children}</p>,
+          ul: ({children}) => <ul className="list-disc list-inside mb-4 text-gray-300">{children}</ul>,
+          li: ({children}) => <li className="mb-2">{children}</li>,
+          a: ({href, children}) => (
+            <a href={href} className="text-blue-400 hover:text-blue-300 underline">
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {post.body}
+      </ReactMarkdown>
+    </article>
   );
 };
 
@@ -63,7 +89,7 @@ const Newsletter = () => {
       <div className="max-w-6xl mx-auto px-4 text-center">
         <h2 className="text-3xl font-bold text-white mb-6">Stay Updated</h2>
         <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-          Subscribe to my newsletter for the latest insights on technology, finance, and gaming.
+          Subscribe to get notified about new articles and web development insights.
         </p>
         <form className="flex gap-4 max-w-md mx-auto">
           <input
@@ -83,30 +109,30 @@ const Newsletter = () => {
 };
 
 const HomePage = () => {
-  const categories = [
-    { id: 1, name: "Tech", count: 12, icon: "💻" },
-    { id: 2, name: "Finance", count: 8, icon: "📈" },
-    { id: 3, name: "Sports", count: 6, icon: "⚽" },
-    { id: 4, name: "Commerce", count: 5, icon: "🛍️" },
-    { id: 5, name: "Video Games", count: 9, icon: "🎮" }
-  ];
-
-  const recentPosts = [
-    { id: 1, title: "The Future of AI Development", date: "March 2024", readTime: "5 min", category: "Tech", image: "/api/placeholder/400/250" },
-    { id: 2, title: "Market Analysis Q1 2024", date: "March 2024", readTime: "4 min", category: "Finance", image: "/api/placeholder/400/250" },
-    { id: 3, title: "Latest Gaming Trends", date: "February 2024", readTime: "6 min", category: "Video Games", image: "/api/placeholder/400/250" }
-  ];
-
-  const categoriesRef = useRef(null);
+  const [posts, setPosts] = useState([]);
   const postsRef = useRef(null);
-  const isCategoriesVisible = useInView(categoriesRef);
   const isPostsVisible = useInView(postsRef);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/getPosts');
+        if (!response.ok) throw new Error('Failed to fetch posts');
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   return (
     <>
       <Header />
 
-      {/* Hero Section */}
       <section className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white flex items-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(100,50,255,0.1),transparent_50%)]" />
         <div className="max-w-6xl mx-auto px-4 py-32 relative">
@@ -115,8 +141,8 @@ const HomePage = () => {
               Alice Leiser's Blog
             </h1>
             <p className="text-xl md:text-2xl text-gray-400 max-w-2xl">
-              Exploring technology, finance, sports, and gaming. 
-              Delivering insights across multiple domains.
+              Web Developer. Founder of WebPixel.
+              Sharing insights about modern web development.
             </p>
             <div className="pt-8">
               <a href="#recent-posts" className="px-8 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors inline-flex items-center gap-2">
@@ -128,68 +154,21 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section ref={categoriesRef} className="bg-black text-white py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8">Browse by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {categories.map((category, index) => (
-              <div 
-                key={category.id}
-                className={`bg-gray-900 p-6 rounded-lg cursor-pointer hover:bg-gray-800 transition-all duration-300 transform ${
-                  isCategoriesVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-10'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <span className="text-2xl mb-4 block">{category.icon}</span>
-                <h3 className="text-xl font-semibold mb-2">{category.name}</h3>
-                <p className="text-gray-400">{category.count} articles</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Recent Posts Section */}
       <section id="recent-posts" ref={postsRef} className="bg-black text-white py-24">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-12">Recent Articles</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {recentPosts.map((post, index) => (
-              <article 
-                key={post.id} 
-                className={`group cursor-pointer transform transition-all duration-500 ${
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-12">Latest Articles</h2>
+          <div className="space-y-12">
+            {posts.map((post) => (
+              <div 
+                key={post.id}
+                className={`transform transition-all duration-500 ${
                   isPostsVisible 
                     ? 'opacity-100 translate-y-0' 
                     : 'opacity-0 translate-y-10'
                 }`}
-                style={{ transitionDelay: `${index * 200}ms` }}
               >
-                <div className="bg-gray-900 rounded-lg overflow-hidden">
-                  <img 
-                    src={post.image} 
-                    alt={post.title}
-                    className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="p-8">
-                    <div className="text-sm text-gray-400 mb-4">
-                      {post.date} · {post.readTime} read
-                    </div>
-                    <span className="inline-block px-3 py-1 text-sm bg-gray-800 text-gray-300 rounded-full mb-4">
-                      {post.category}
-                    </span>
-                    <h3 className="text-xl font-semibold mb-4 group-hover:text-gray-300">
-                      {post.title}
-                    </h3>
-                    <div className="text-gray-400 group-hover:text-white transition-colors duration-300 flex items-center gap-2">
-                      Read More 
-                      <span className="transform group-hover:translate-x-2 transition-transform">→</span>
-                    </div>
-                  </div>
-                </div>
-              </article>
+                <BlogPost post={post} />
+              </div>
             ))}
           </div>
         </div>
@@ -197,23 +176,12 @@ const HomePage = () => {
 
       <Newsletter />
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="text-white text-lg font-semibold mb-4">About</h3>
-              <p className="text-sm">A personal blog covering technology, finance, sports, and gaming insights.</p>
-            </div>
-            <div>
-              <h3 className="text-white text-lg font-semibold mb-4">Categories</h3>
-              <ul className="space-y-2 text-sm">
-                {categories.map(category => (
-                  <li key={category.id}>
-                    <a href="#" className="hover:text-white transition-colors">{category.name}</a>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-sm">Web developer and founder of WebPixel, sharing insights about modern web development.</p>
             </div>
             <div>
               <h3 className="text-white text-lg font-semibold mb-4">Connect</h3>
