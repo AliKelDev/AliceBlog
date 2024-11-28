@@ -1,19 +1,18 @@
-// src/api/getPosts.js
-import { promises as fs } from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
+const fs = require('fs');
+const path = require('path');
+const matter = require('gray-matter');
 
-export async function getPosts() {
+exports.handler = async (event) => {
   try {
     const postsDirectory = path.join(process.cwd(), 'content/posts');
-    const files = await fs.readdir(postsDirectory);
+    const files = await fs.promises.readdir(postsDirectory);
     
     const posts = await Promise.all(
       files
         .filter(file => file.endsWith('.md'))
         .map(async (file) => {
           const filePath = path.join(postsDirectory, file);
-          const fileContent = await fs.readFile(filePath, 'utf8');
+          const fileContent = await fs.promises.readFile(filePath, 'utf8');
           const { data, content } = matter(fileContent);
           
           return {
@@ -29,9 +28,17 @@ export async function getPosts() {
     );
     
     // Sort posts by date
-    return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(sortedPosts)
+    };
   } catch (error) {
     console.error('Error fetching posts:', error);
-    return [];
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to fetch posts' })
+    };
   }
-}
+};
