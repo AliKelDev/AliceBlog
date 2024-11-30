@@ -1,33 +1,33 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
-exports.handler = async (event) => {
+export async function handler(event) {
   const { id } = event.queryStringParameters;
-
+  
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Post ID is required' })
+    };
+  }
+  
   try {
-    const postsDirectory = path.join(process.cwd(), 'content/posts');
-    const filePath = path.join(postsDirectory, `${id}.md`);
-    const fileContent = await fs.promises.readFile(filePath, 'utf8');
-    const { data, content } = matter(fileContent);
+    // Read the actual markdown file
+    const filePath = join(process.cwd(), 'content', 'posts', `${id}.md`);
+    const content = await readFile(filePath, 'utf8');
     
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        id,
-        title: data.title,
-        date: data.date,
-        description: data.description,
-        thumbnail: data.thumbnail,
-        tags: data.tags,
-        body: content
-      })
+      headers: {
+        'Content-Type': 'text/markdown'
+      },
+      body: content
     };
   } catch (error) {
-    console.error('Error fetching post:', error);
+    console.error('Error reading post:', error);
     return {
       statusCode: 404,
-      body: JSON.stringify({ error: 'Post not found' })
+      body: JSON.stringify({ message: 'Post not found' })
     };
   }
-};
+}

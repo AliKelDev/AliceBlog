@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import BlogPostPage from './pages/BlogPostPage';
 
 const useInView = (ref) => {
@@ -43,9 +44,9 @@ const Header = () => {
       <nav className="max-w-6xl mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="text-white text-xl font-bold">AL</Link>
         <div className="flex gap-8 text-gray-300">
-          <Link to="#" className="hover:text-white transition-colors">About</Link>
-          <Link to="#" className="hover:text-white transition-colors">Blog</Link>
-          <Link to="#" className="hover:text-white transition-colors">Contact</Link>
+          <Link to="/" className="hover:text-white transition-colors">Home</Link>
+          <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
+          <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
         </div>
       </nav>
     </header>
@@ -53,16 +54,56 @@ const Header = () => {
 };
 
 const BlogPost = ({ post }) => {
+  if (!post) return null;
+
+  // Separate frontmatter and content
+  const { 
+    title, 
+    date, 
+    description, 
+    tags = [], 
+    thumbnail,
+    body // This is the markdown content
+  } = post;
+
+  const previewContent = body?.length > 300 
+    ? `${body.substring(0, 300)}...`
+    : body || '';
+
   return (
     <article className="bg-gray-900 rounded-lg overflow-hidden p-8">
-      <div className="text-sm text-gray-400 mb-4">
-        {post.date}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-white mb-3">{title}</h2>
+        <div className="flex flex-wrap gap-4 items-center text-sm text-gray-400 mb-4">
+          <time dateTime={date}>{date}</time>
+          <div className="flex gap-2">
+            {tags.map((tag, index) => (
+              <span 
+                key={index}
+                className="bg-gray-800 px-2 py-1 rounded-md text-gray-300"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+        {description && (
+          <p className="text-gray-300 text-lg mb-4">{description}</p>
+        )}
+        {thumbnail && (
+          <img 
+            src={thumbnail} 
+            alt={title}
+            className="w-full h-48 object-cover rounded-lg mb-6"
+          />
+        )}
       </div>
       <ReactMarkdown
         className="prose prose-invert max-w-none"
         components={{
           h1: ({children}) => <h1 className="text-4xl font-bold mb-8 text-white">{children}</h1>,
           h2: ({children}) => <h2 className="text-2xl font-bold mt-8 mb-4 text-white">{children}</h2>,
+          h3: ({children}) => <h3 className="text-xl font-bold mt-6 mb-3 text-white">{children}</h3>,
           p: ({children}) => <p className="text-gray-300 mb-4 text-lg">{children}</p>,
           ul: ({children}) => <ul className="list-disc list-inside mb-4 text-gray-300">{children}</ul>,
           li: ({children}) => <li className="mb-2">{children}</li>,
@@ -71,9 +112,27 @@ const BlogPost = ({ post }) => {
               {children}
             </a>
           ),
+          code: ({node, inline, className, children, ...props}) => {
+            const match = /language-(\w+)/.exec(className || '');
+            if (inline) {
+              return (
+                <code className="bg-gray-800 text-gray-200 px-1 rounded" {...props}>
+                  {children}
+                </code>
+              );
+            }
+            return (
+              <div className="bg-gray-800 rounded-lg p-4 mb-4">
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </div>
+            );
+          },
+          pre: ({children}) => <pre className="overflow-x-auto">{children}</pre>,
         }}
       >
-        {post.body.substring(0, 300)}...
+        {previewContent}
       </ReactMarkdown>
       <div className="mt-6">
         <Link 
@@ -245,12 +304,14 @@ const MainContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainContent />} />
-        <Route path="/blog/:id" element={<BlogPostPage />} />
-      </Routes>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainContent />} />
+          <Route path="/blog/:id" element={<BlogPostPage />} />
+        </Routes>
+      </Router>
+    </HelmetProvider>
   );
 };
 
