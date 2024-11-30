@@ -1,4 +1,4 @@
-import { Octokit } from '@octokit/rest';
+// netlify/functions/getPost.js
 import matter from 'gray-matter';
 import path from 'path';
 import fs from 'fs';
@@ -41,8 +41,11 @@ export const handler = async (event) => {
     }
     
     // Production - using GitHub API
+    const { Octokit } = await import('@octokit/rest');
+    
     const octokit = new Octokit({
-      auth: process.env.GITHUBTOKEN
+      auth: process.env.GITHUBTOKEN,
+      userAgent: 'aliceblog v1.0'
     });
 
     const { data: fileData } = await octokit.repos.getContent({
