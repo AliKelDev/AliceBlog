@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import BlogPostPage from './pages/BlogPostPage';
 
+// Custom hook for intersection observer
 const useInView = (ref) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -26,6 +27,7 @@ const useInView = (ref) => {
   return isVisible;
 };
 
+// Header Component with scroll effect
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -46,6 +48,7 @@ const Header = () => {
         <div className="flex gap-8 text-gray-300">
           <Link to="/" className="hover:text-white transition-colors">Home</Link>
           <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
+          <Link to="/admin" className="hover:text-white transition-colors">Admin</Link>
           <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
         </div>
       </nav>
@@ -53,17 +56,17 @@ const Header = () => {
   );
 };
 
+// Blog Post Component
 const BlogPost = ({ post }) => {
   if (!post) return null;
 
-  // Separate frontmatter and content
   const { 
     title, 
     date, 
     description, 
     tags = [], 
     thumbnail,
-    body // This is the markdown content
+    body 
   } = post;
 
   const previewContent = body?.length > 300 
@@ -75,7 +78,7 @@ const BlogPost = ({ post }) => {
       <div className="mb-6">
         <h2 className="text-3xl font-bold text-white mb-3">{title}</h2>
         <div className="flex flex-wrap gap-4 items-center text-sm text-gray-400 mb-4">
-          <time dateTime={date}>{date}</time>
+          <time dateTime={date}>{new Date(date).toLocaleDateString()}</time>
           <div className="flex gap-2">
             {tags.map((tag, index) => (
               <span 
@@ -95,6 +98,7 @@ const BlogPost = ({ post }) => {
             src={thumbnail} 
             alt={title}
             className="w-full h-48 object-cover rounded-lg mb-6"
+            loading="lazy"
           />
         )}
       </div>
@@ -113,7 +117,6 @@ const BlogPost = ({ post }) => {
             </a>
           ),
           code: ({node, inline, className, children, ...props}) => {
-            const match = /language-(\w+)/.exec(className || '');
             if (inline) {
               return (
                 <code className="bg-gray-800 text-gray-200 px-1 rounded" {...props}>
@@ -146,10 +149,18 @@ const BlogPost = ({ post }) => {
   );
 };
 
+// Newsletter Component with animation
 const Newsletter = () => {
   const [email, setEmail] = useState('');
   const containerRef = useRef(null);
   const isVisible = useInView(containerRef);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Add newsletter subscription logic here
+    console.log('Newsletter subscription:', email);
+    setEmail('');
+  };
 
   return (
     <section ref={containerRef} className={`bg-gradient-to-r from-purple-900 to-blue-900 py-24 transition-all duration-1000 ${
@@ -160,13 +171,14 @@ const Newsletter = () => {
         <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
           Subscribe to get notified about new articles and web development insights.
         </p>
-        <form className="flex gap-4 max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="flex gap-4 max-w-md mx-auto">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
             className="flex-1 px-4 py-2 rounded-lg bg-white/10 text-white placeholder-gray-400 border border-white/20 focus:outline-none focus:border-white/40"
+            required
           />
           <button type="submit" className="px-6 py-2 bg-white text-purple-900 rounded-lg hover:bg-gray-100 transition-colors">
             Subscribe
@@ -177,6 +189,7 @@ const Newsletter = () => {
   );
 };
 
+// Footer Component
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-400 py-12">
@@ -210,7 +223,7 @@ const Footer = () => {
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">Subscribe</h3>
             <p className="text-sm mb-4">Get the latest updates directly to your inbox.</p>
-            <a href="#" className="text-sm text-white bg-gray-800 px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors inline-block">
+            <a href="#newsletter" className="text-sm text-white bg-gray-800 px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors inline-block">
               Subscribe Now
             </a>
           </div>
@@ -220,9 +233,9 @@ const Footer = () => {
             © 2024 Alice Leiser. All rights reserved.
           </div>
           <div className="text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <span className="mx-2">·</span>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>
@@ -230,20 +243,26 @@ const Footer = () => {
   );
 };
 
+// Main Content Component
 const MainContent = () => {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const postsRef = useRef(null);
   const isPostsVisible = useInView(postsRef);
 
   const loadPosts = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/.netlify/functions/getPosts');
       if (!response.ok) throw new Error('Failed to fetch posts');
       const data = await response.json();
       setPosts(data);
     } catch (error) {
       console.error('Error fetching posts:', error);
-      setPosts([]);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -279,20 +298,34 @@ const MainContent = () => {
       <section id="recent-posts" ref={postsRef} className="bg-black text-white py-24">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-12">Latest Articles</h2>
-          <div className="space-y-12">
-            {posts.map((post) => (
-              <div 
-                key={post.id}
-                className={`transform transition-all duration-500 ${
-                  isPostsVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-10'
-                }`}
-              >
-                <BlogPost post={post} />
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-400">
+              {error}
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              No posts found. Check back soon!
+            </div>
+          ) : (
+            <div className="space-y-12">
+              {posts.map((post) => (
+                <div 
+                  key={post.id}
+                  className={`transform transition-all duration-500 ${
+                    isPostsVisible 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-10'
+                  }`}
+                >
+                  <BlogPost post={post} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -302,6 +335,16 @@ const MainContent = () => {
   );
 };
 
+// Admin redirect component
+const AdminRedirect = () => {
+  useEffect(() => {
+    window.location.href = '/admin/';
+  }, []);
+
+  return <div>Redirecting to admin...</div>;
+};
+
+// Main App Component
 const App = () => {
   return (
     <HelmetProvider>
@@ -309,6 +352,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<MainContent />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
+          <Route path="/admin" element={<AdminRedirect />} />
         </Routes>
       </Router>
     </HelmetProvider>

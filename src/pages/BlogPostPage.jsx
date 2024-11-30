@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 globalThis.Buffer = Buffer;
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Helmet } from 'react-helmet-async';
 import matter from 'gray-matter';
@@ -29,6 +29,7 @@ const BlogPostPage = () => {
       if (!id) return;
       
       try {
+        setLoading(true);
         const response = await fetch(`/.netlify/functions/getPost?id=${id}`);
         if (!response.ok) throw new Error('Post not found');
         
@@ -38,7 +39,6 @@ const BlogPostPage = () => {
           const { data: frontmatter, content } = matter(rawContent);
           setPost({
             frontmatter,
-            // Remove the frontmatter section from the content
             content: content.replace(/^---[\s\S]*?---/, '').trim()
           });
         } catch (parseError) {
@@ -70,9 +70,9 @@ const BlogPostPage = () => {
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4">Error Loading Post</h1>
           <p className="text-gray-400 mb-8">{error}</p>
-          <a href="/" className="px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors">
+          <Link to="/" className="px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors">
             Return Home
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -85,23 +85,29 @@ const BlogPostPage = () => {
   return (
     <>
       <Helmet>
-        <title>{frontmatter.title || 'Blog Post'}</title>
+        <title>{frontmatter.title || 'Blog Post'} - Alice Leiser's Blog</title>
         <meta name="description" content={frontmatter.description || ''} />
         <meta property="og:title" content={frontmatter.title || ''} />
         <meta property="og:description" content={frontmatter.description || ''} />
         <meta property="og:image" content={frontmatter.thumbnail || ''} />
         <meta name="keywords" content={frontmatter.tags?.join(', ') || ''} />
+        <meta property="og:type" content="article" />
+        <meta name="author" content="Alice Leiser" />
+        {frontmatter.date && (
+          <meta property="article:published_time" content={new Date(frontmatter.date).toISOString()} />
+        )}
       </Helmet>
 
       <header className={`fixed w-full z-50 transition-all duration-300 ${
         isScrolled ? 'bg-black/90 backdrop-blur-sm py-4' : 'bg-transparent py-6'
       }`}>
         <nav className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <a href="/" className="text-white text-xl font-bold">AL</a>
+          <Link to="/" className="text-white text-xl font-bold">AL</Link>
           <div className="flex gap-8 text-gray-300">
-            <a href="/" className="hover:text-white transition-colors">Home</a>
-            <a href="/blog" className="hover:text-white transition-colors">Blog</a>
-            <a href="/contact" className="hover:text-white transition-colors">Contact</a>
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
+            <Link to="/admin" className="hover:text-white transition-colors">Admin</Link>
+            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
           </div>
         </nav>
       </header>
@@ -119,11 +125,15 @@ const BlogPostPage = () => {
                   })}
                 </time>
               )}
-              {frontmatter.tags && frontmatter.tags.map(tag => (
-                <span key={tag} className="ml-4 px-3 py-1 bg-gray-800 rounded-full text-sm">
-                  {tag}
-                </span>
-              ))}
+              {frontmatter.tags && frontmatter.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {frontmatter.tags.map(tag => (
+                    <span key={tag} className="px-3 py-1 bg-gray-800 rounded-full text-sm">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <h1 className="text-5xl font-bold text-white mb-6">
               {frontmatter.title}
@@ -132,6 +142,14 @@ const BlogPostPage = () => {
               <p className="text-xl text-gray-300">
                 {frontmatter.description}
               </p>
+            )}
+            {frontmatter.thumbnail && (
+              <img
+                src={frontmatter.thumbnail}
+                alt={frontmatter.title}
+                className="w-full h-64 object-cover rounded-xl mt-8"
+                loading="lazy"
+              />
             )}
           </header>
 
@@ -154,6 +172,19 @@ const BlogPostPage = () => {
                     <code className={className} {...props}>
                       {children}
                     </code>
+                  );
+                },
+                a({ node, href, children, ...props }) {
+                  return (
+                    <a
+                      href={href}
+                      className="text-blue-400 hover:text-blue-300 underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      {...props}
+                    >
+                      {children}
+                    </a>
                   );
                 }
               }}

@@ -1,7 +1,8 @@
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+const fs = require('fs');
+const path = require('path');
+const matter = require('gray-matter');
 
-export async function handler(event) {
+exports.handler = async (event) => {
   const { id } = event.queryStringParameters;
   
   if (!id) {
@@ -12,9 +13,8 @@ export async function handler(event) {
   }
   
   try {
-    // Read the actual markdown file
-    const filePath = join(process.cwd(), 'content', 'posts', `${id}.md`);
-    const content = await readFile(filePath, 'utf8');
+    const filePath = path.join(process.cwd(), 'content', 'posts', `${id}.md`);
+    const content = await fs.promises.readFile(filePath, 'utf8');
     
     return {
       statusCode: 200,

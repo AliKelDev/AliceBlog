@@ -2,8 +2,8 @@ backend:
   name: git-gateway
   branch: main
 
-media_folder: "public/images"
-public_folder: "/images"
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
 
 collections:
   - name: "blog"
@@ -14,7 +14,19 @@ collections:
     fields:
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Publish Date", name: "date", widget: "datetime"}
-      - {label: "Featured Image", name: "thumbnail", widget: "image", required: false}
       - {label: "Description", name: "description", widget: "text"}
-      - {label: "Tags", name: "tags", widget: "list", required: false}
+      - {label: "Featured Image", name: "thumbnail", widget: "image", required: false}
+      - {label: "Tags", name: "tags", widget: "list", required: false, allow_add: true, field: {label: "Tag", name: "tag", widget: "string"}}
       - {label: "Body", name: "body", widget: "markdown"}
+    sortable_fields: ['date', 'title']
+    view_filters:
+      - label: "Drafts"
+        field: "date"
+        pattern: ''
+      - label: "Posts With Image"
+        field: "thumbnail"
+        pattern: '.'
+    view_groups:
+      - label: Year
+        field: date
+        pattern: \d{4}
