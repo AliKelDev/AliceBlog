@@ -70,8 +70,12 @@ exports.handler = async (event) => {
   } catch (error) {
     console.error('Error reading post:', error);
     return {
-      statusCode: 404,
-      body: JSON.stringify({ message: 'Post not found' })
+      statusCode: 500,  // Changed from 404 to 500 for server errors
+      body: JSON.stringify({ 
+        message: 'Error fetching post',
+        error: error.message,  // Add the actual error message
+        path: `content/posts/${id}.md`  // Add the attempted path
+      })
     };
-  }
+}
 };
