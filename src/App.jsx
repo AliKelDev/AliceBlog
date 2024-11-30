@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import BlogPostPage from './pages/BlogPostPage';
+import BlogIndexPage from './pages/BlogIndexPage';
 
 // Custom hook for intersection observer
 const useInView = (ref) => {
@@ -351,6 +352,7 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={<MainContent />} />
+          <Route path="/blog" element={<BlogIndexPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/admin" element={<AdminRedirect />} />
         </Routes>

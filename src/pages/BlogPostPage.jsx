@@ -1,20 +1,22 @@
 import { Buffer } from 'buffer';
 globalThis.Buffer = Buffer;
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { Helmet } from 'react-helmet-async';
-import matter from 'gray-matter';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
+import { Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const BlogPostPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [adjacentPosts, setAdjacentPosts] = useState({ prev: null, next: null });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,17 +35,19 @@ const BlogPostPage = () => {
         const response = await fetch(`/.netlify/functions/getPost?id=${id}`);
         if (!response.ok) throw new Error('Post not found');
         
-        const rawContent = await response.text();
-        
-        try {
-          const { data: frontmatter, content } = matter(rawContent);
-          setPost({
-            frontmatter,
-            content: content.replace(/^---[\s\S]*?---/, '').trim()
+        const postData = await response.json();
+        setPost(postData);
+
+        // Fetch all posts to determine adjacent posts
+        const allPostsResponse = await fetch('/.netlify/functions/getPosts');
+        if (allPostsResponse.ok) {
+          const allPosts = await allPostsResponse.json();
+          const currentIndex = allPosts.findIndex(post => post.id === id);
+          
+          setAdjacentPosts({
+            prev: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
+            next: currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
           });
-        } catch (parseError) {
-          console.error('Parse error:', parseError);
-          setError('Error parsing post content');
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -55,6 +59,26 @@ const BlogPostPage = () => {
 
     fetchPost();
   }, [id]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: post.title,
+      text: post.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        // You might want to add a toast notification here
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
 
   if (loading) {
     return (
@@ -80,21 +104,19 @@ const BlogPostPage = () => {
 
   if (!post) return null;
 
-  const { frontmatter, content } = post;
-
   return (
     <>
       <Helmet>
-        <title>{frontmatter.title || 'Blog Post'} - Alice Leiser's Blog</title>
-        <meta name="description" content={frontmatter.description || ''} />
-        <meta property="og:title" content={frontmatter.title || ''} />
-        <meta property="og:description" content={frontmatter.description || ''} />
-        <meta property="og:image" content={frontmatter.thumbnail || ''} />
-        <meta name="keywords" content={frontmatter.tags?.join(', ') || ''} />
+        <title>{post.title || 'Blog Post'} - Alice Leiser's Blog</title>
+        <meta name="description" content={post.description || ''} />
+        <meta property="og:title" content={post.title || ''} />
+        <meta property="og:description" content={post.description || ''} />
+        <meta property="og:image" content={post.thumbnail || ''} />
+        <meta name="keywords" content={post.tags?.join(', ') || ''} />
         <meta property="og:type" content="article" />
         <meta name="author" content="Alice Leiser" />
-        {frontmatter.date && (
-          <meta property="article:published_time" content={new Date(frontmatter.date).toISOString()} />
+        {post.date && (
+          <meta property="article:published_time" content={new Date(post.date).toISOString()} />
         )}
       </Helmet>
 
@@ -115,38 +137,43 @@ const BlogPostPage = () => {
       <main className="min-h-screen bg-black pt-32 pb-24">
         <article className="max-w-4xl mx-auto px-4">
           <header className="mb-12">
-            <div className="text-gray-400 mb-4">
-              {frontmatter.date && (
-                <time dateTime={frontmatter.date}>
-                  {new Date(frontmatter.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </time>
-              )}
-              {frontmatter.tags && frontmatter.tags.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {frontmatter.tags.map(tag => (
-                    <span key={tag} className="px-3 py-1 bg-gray-800 rounded-full text-sm">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+            <div className="flex justify-between items-center mb-4">
+              <time dateTime={post.date} className="text-gray-400">
+                {new Date(post.date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </time>
+              <button 
+                onClick={handleShare}
+                className="p-2 text-gray-400 hover:text-white transition-colors"
+                aria-label="Share post"
+              >
+                <Share2 size={20} />
+              </button>
             </div>
+            {post.tags && post.tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {post.tags.map(tag => (
+                  <span key={tag} className="px-3 py-1 bg-gray-800 rounded-full text-sm">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <h1 className="text-5xl font-bold text-white mb-6">
-              {frontmatter.title}
+              {post.title}
             </h1>
-            {frontmatter.description && (
+            {post.description && (
               <p className="text-xl text-gray-300">
-                {frontmatter.description}
+                {post.description}
               </p>
             )}
-            {frontmatter.thumbnail && (
+            {post.thumbnail && (
               <img
-                src={frontmatter.thumbnail}
-                alt={frontmatter.title}
+                src={post.thumbnail}
+                alt={post.title}
                 className="w-full h-64 object-cover rounded-xl mt-8"
                 loading="lazy"
               />
@@ -189,9 +216,38 @@ const BlogPostPage = () => {
                 }
               }}
             >
-              {content}
+              {post.body}
             </ReactMarkdown>
           </div>
+
+          <nav className="mt-12 border-t border-gray-800 pt-8">
+            <div className="flex justify-between items-center">
+              {adjacentPosts.prev && (
+                <Link
+                  to={`/blog/${adjacentPosts.prev.id}`}
+                  className="flex items-center text-gray-400 hover:text-white transition-colors"
+                >
+                  <ChevronLeft size={20} className="mr-2" />
+                  <div>
+                    <div className="text-sm">Previous</div>
+                    <div className="font-medium">{adjacentPosts.prev.title}</div>
+                  </div>
+                </Link>
+              )}
+              {adjacentPosts.next && (
+                <Link
+                  to={`/blog/${adjacentPosts.next.id}`}
+                  className="flex items-center text-gray-400 hover:text-white transition-colors ml-auto"
+                >
+                  <div className="text-right">
+                    <div className="text-sm">Next</div>
+                    <div className="font-medium">{adjacentPosts.next.title}</div>
+                  </div>
+                  <ChevronRight size={20} className="ml-2" />
+                </Link>
+              )}
+            </div>
+          </nav>
         </article>
       </main>
     </>
