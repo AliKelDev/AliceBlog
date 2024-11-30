@@ -1,43 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const { Octokit } = require('@octokit/rest');
+import { Octokit } from '@octokit/rest';
+import matter from 'gray-matter';
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   try {
-    // Local development
-    if (process.env.NETLIFY_DEV) {
-      const postsDirectory = path.join(process.cwd(), 'content/posts');
-      const files = await fs.promises.readdir(postsDirectory);
-      
-      const posts = await Promise.all(
-        files
-          .filter(file => file.endsWith('.md'))
-          .map(async (file) => {
-            const filePath = path.join(postsDirectory, file);
-            const fileContent = await fs.promises.readFile(filePath, 'utf8');
-            const { data, content } = matter(fileContent);
-            
-            return {
-              id: file.replace('.md', ''),
-              title: data.title,
-              date: data.date,
-              description: data.description,
-              thumbnail: data.thumbnail,
-              tags: data.tags,
-              body: content
-            };
-          })
-      );
-      
-      const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-      return {
-        statusCode: 200,
-        body: JSON.stringify(sortedPosts)
-      };
-    }
-
-    // Production - using GitHub API
     const octokit = new Octokit({
       auth: process.env.GITHUBTOKEN
     });
@@ -51,15 +16,15 @@ exports.handler = async (event) => {
     const posts = await Promise.all(
       files
         .filter(file => file.name.endsWith('.md'))
-        .map(async (file) => {
+        .map(async file => {
           const { data: fileData } = await octokit.repos.getContent({
             owner: process.env.GITHUBOWNER,
             repo: process.env.GITHUBREPO,
             path: file.path
           });
 
-          const fileContent = Buffer.from(fileData.content, 'base64').toString();
-          const { data, content } = matter(fileContent);
+          const content = Buffer.from(fileData.content, 'base64').toString();
+          const { data } = matter(content);
           
           return {
             id: file.name.replace('.md', ''),
@@ -67,23 +32,32 @@ exports.handler = async (event) => {
             date: data.date,
             description: data.description,
             thumbnail: data.thumbnail,
-            tags: data.tags,
-            body: content
+            tags: data.tags
           };
         })
     );
 
-    const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
     return {
       statusCode: 200,
-      body: JSON.stringify(sortedPosts)
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify(posts)
     };
-
+    
   } catch (error) {
     console.error('Error fetching posts:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch posts' })
+      body: JSON.stringify({ 
+        message: 'Error fetching posts',
+        error: error.message,
+        details: {
+          name: error.name,
+          stack: error.stack
+        }
+      })
     };
   }
 };

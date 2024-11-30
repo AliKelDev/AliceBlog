@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const { Octokit } = require('@octokit/rest');
+import { Octokit } from '@octokit/rest';
+import matter from 'gray-matter';
+import path from 'path';
+import fs from 'fs';
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   const { id } = event.queryStringParameters;
   
   if (!id) {
@@ -14,7 +14,6 @@ exports.handler = async (event) => {
   }
   
   try {
-    // Construct the file path with .md extension if not present
     const filePath = `content/posts/${id}${id.endsWith('.md') ? '' : '.md'}`;
 
     // Local development
@@ -26,7 +25,8 @@ exports.handler = async (event) => {
       return {
         statusCode: 200,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify({
           id: id,
@@ -57,7 +57,8 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({
         id: id,
@@ -74,10 +75,18 @@ exports.handler = async (event) => {
     console.error('Error reading post:', error);
     return {
       statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify({ 
         message: 'Error fetching post',
         error: error.message,
-        path: `content/posts/${id}${id.endsWith('.md') ? '' : '.md'}`
+        path: filePath,
+        details: {
+          name: error.name,
+          stack: error.stack
+        }
       })
     };
   }
