@@ -14,10 +14,13 @@ exports.handler = async (event) => {
   }
   
   try {
+    // Construct the file path with .md extension if not present
+    const filePath = `content/posts/${id}${id.endsWith('.md') ? '' : '.md'}`;
+
     // Local development
     if (process.env.NETLIFY_DEV) {
-      const filePath = path.join(process.cwd(), 'content', 'posts', `${id}.md`);
-      const content = await fs.promises.readFile(filePath, 'utf8');
+      const localPath = path.join(process.cwd(), filePath);
+      const content = await fs.promises.readFile(localPath, 'utf8');
       const { data, content: markdown } = matter(content);
       
       return {
@@ -45,7 +48,7 @@ exports.handler = async (event) => {
     const { data: fileData } = await octokit.repos.getContent({
       owner: process.env.GITHUBOWNER,
       repo: process.env.GITHUBREPO,
-      path: `content/posts/${id}.md`
+      path: filePath
     });
 
     const content = Buffer.from(fileData.content, 'base64').toString();
@@ -70,12 +73,12 @@ exports.handler = async (event) => {
   } catch (error) {
     console.error('Error reading post:', error);
     return {
-      statusCode: 500,  // Changed from 404 to 500 for server errors
+      statusCode: 500,
       body: JSON.stringify({ 
         message: 'Error fetching post',
-        error: error.message,  // Add the actual error message
-        path: `content/posts/${id}.md`  // Add the attempted path
+        error: error.message,
+        path: `content/posts/${id}${id.endsWith('.md') ? '' : '.md'}`
       })
     };
-}
+  }
 };
