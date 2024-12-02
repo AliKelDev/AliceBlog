@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { MDXProvider } from '@mdx-js/react';
 import BlogPostPage from './pages/BlogPostPage';
 import BlogIndexPage from './pages/BlogIndexPage';
+import { allPosts } from "../content/posts/index.js";
 
 // Custom hook for intersection observer
 const useInView = (ref) => {
@@ -49,7 +50,6 @@ const Header = () => {
         <div className="flex gap-8 text-gray-300">
           <Link to="/" className="hover:text-white transition-colors">Home</Link>
           <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
-          <Link to="/admin" className="hover:text-white transition-colors">Admin</Link>
           <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
         </div>
       </nav>
@@ -67,12 +67,8 @@ const BlogPost = ({ post }) => {
     description, 
     tags = [], 
     thumbnail,
-    body 
+    excerpt 
   } = post;
-
-  const previewContent = body?.length > 300 
-    ? `${body.substring(0, 300)}...`
-    : body || '';
 
   return (
     <article className="bg-gray-900 rounded-lg overflow-hidden p-8">
@@ -103,41 +99,11 @@ const BlogPost = ({ post }) => {
           />
         )}
       </div>
-      <ReactMarkdown
-        className="prose prose-invert max-w-none"
-        components={{
-          h1: ({children}) => <h1 className="text-4xl font-bold mb-8 text-white">{children}</h1>,
-          h2: ({children}) => <h2 className="text-2xl font-bold mt-8 mb-4 text-white">{children}</h2>,
-          h3: ({children}) => <h3 className="text-xl font-bold mt-6 mb-3 text-white">{children}</h3>,
-          p: ({children}) => <p className="text-gray-300 mb-4 text-lg">{children}</p>,
-          ul: ({children}) => <ul className="list-disc list-inside mb-4 text-gray-300">{children}</ul>,
-          li: ({children}) => <li className="mb-2">{children}</li>,
-          a: ({href, children}) => (
-            <a href={href} className="text-blue-400 hover:text-blue-300 underline">
-              {children}
-            </a>
-          ),
-          code: ({node, inline, className, children, ...props}) => {
-            if (inline) {
-              return (
-                <code className="bg-gray-800 text-gray-200 px-1 rounded" {...props}>
-                  {children}
-                </code>
-              );
-            }
-            return (
-              <div className="bg-gray-800 rounded-lg p-4 mb-4">
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              </div>
-            );
-          },
-          pre: ({children}) => <pre className="overflow-x-auto">{children}</pre>,
-        }}
-      >
-        {previewContent}
-      </ReactMarkdown>
+      <div className="prose prose-invert max-w-none mb-6">
+        <MDXProvider>
+          {excerpt || description}
+        </MDXProvider>
+      </div>
       <div className="mt-6">
         <Link 
           to={`/blog/${post.id}`}
@@ -158,7 +124,6 @@ const Newsletter = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add newsletter subscription logic here
     console.log('Newsletter subscription:', email);
     setEmail('');
   };
@@ -246,30 +211,11 @@ const Footer = () => {
 
 // Main Content Component
 const MainContent = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [posts] = useState(allPosts.sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  ));
   const postsRef = useRef(null);
   const isPostsVisible = useInView(postsRef);
-
-  const loadPosts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/.netlify/functions/getPosts');
-      if (!response.ok) throw new Error('Failed to fetch posts');
-      const data = await response.json();
-      setPosts(data);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadPosts();
-  }, []);
 
   return (
     <>
@@ -299,15 +245,7 @@ const MainContent = () => {
       <section id="recent-posts" ref={postsRef} className="bg-black text-white py-24">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-12">Latest Articles</h2>
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto"></div>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12 text-red-400">
-              {error}
-            </div>
-          ) : posts.length === 0 ? (
+          {posts.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               No posts found. Check back soon!
             </div>
@@ -336,15 +274,6 @@ const MainContent = () => {
   );
 };
 
-// Admin redirect component
-const AdminRedirect = () => {
-  useEffect(() => {
-    window.location.href = '/admin/';
-  }, []);
-
-  return <div>Redirecting to admin...</div>;
-};
-
 // Main App Component
 const App = () => {
   return (
@@ -354,7 +283,6 @@ const App = () => {
           <Route path="/" element={<MainContent />} />
           <Route path="/blog" element={<BlogIndexPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
-          <Route path="/admin" element={<AdminRedirect />} />
         </Routes>
       </Router>
     </HelmetProvider>

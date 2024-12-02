@@ -1,20 +1,18 @@
 import { Buffer } from 'buffer';
 globalThis.Buffer = Buffer;
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
+import { useParams, Link } from 'react-router-dom';
+import { MDXProvider } from '@mdx-js/react';
 import { Helmet } from 'react-helmet-async';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
 import { Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { allPosts } from "../../content/posts/index.js";
 
 const BlogPostPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [adjacentPosts, setAdjacentPosts] = useState({ prev: null, next: null });
 
@@ -27,37 +25,20 @@ const BlogPostPage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      if (!id) return;
+    if (!id) return;
+    
+    // Find post in local content
+    const foundPost = allPosts.find(post => post.id === id);
+    if (foundPost) {
+      setPost(foundPost);
       
-      try {
-        setLoading(true);
-        const response = await fetch(`/.netlify/functions/getPost?id=${id}`);
-        if (!response.ok) throw new Error('Post not found');
-        
-        const postData = await response.json();
-        setPost(postData);
-
-        // Fetch all posts to determine adjacent posts
-        const allPostsResponse = await fetch('/.netlify/functions/getPosts');
-        if (allPostsResponse.ok) {
-          const allPosts = await allPostsResponse.json();
-          const currentIndex = allPosts.findIndex(post => post.id === id);
-          
-          setAdjacentPosts({
-            prev: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
-            next: currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
-          });
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPost();
+      // Find adjacent posts
+      const currentIndex = allPosts.findIndex(post => post.id === id);
+      setAdjacentPosts({
+        prev: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
+        next: currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
+      });
+    }
   }, [id]);
 
   const handleShare = async () => {
@@ -72,7 +53,6 @@ const BlogPostPage = () => {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        // You might want to add a toast notification here
         alert('Link copied to clipboard!');
       }
     } catch (err) {
@@ -80,29 +60,18 @@ const BlogPostPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!post) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Error Loading Post</h1>
-          <p className="text-gray-400 mb-8">{error}</p>
-          <Link to="/" className="px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors">
-            Return Home
+          <h1 className="text-4xl font-bold mb-4">Post Not Found</h1>
+          <Link to="/blog" className="px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-100 transition-colors">
+            Return to Blog
           </Link>
         </div>
       </div>
     );
   }
-
-  if (!post) return null;
 
   return (
     <>
@@ -181,13 +150,11 @@ const BlogPostPage = () => {
           </header>
 
           <div className="prose prose-invert prose-lg max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw, rehypeHighlight]}
+            <MDXProvider
               components={{
-                code({ node, inline, className, children, ...props }) {
+                code: ({ children, className, ...props }) => {
                   const match = /language-(\w+)/.exec(className || '');
-                  return !inline && match ? (
+                  return match ? (
                     <div className="relative">
                       <pre className={className} {...props}>
                         <code className={className} {...props}>
@@ -201,23 +168,21 @@ const BlogPostPage = () => {
                     </code>
                   );
                 },
-                a({ node, href, children, ...props }) {
-                  return (
-                    <a
-                      href={href}
-                      className="text-blue-400 hover:text-blue-300 underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      {...props}
-                    >
-                      {children}
-                    </a>
-                  );
-                }
+                a: ({ href, children, ...props }) => (
+                  <a
+                    href={href}
+                    className="text-blue-400 hover:text-blue-300 underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                )
               }}
             >
-              {post.body}
-            </ReactMarkdown>
+              {post.component}
+            </MDXProvider>
           </div>
 
           <nav className="mt-12 border-t border-gray-800 pt-8">

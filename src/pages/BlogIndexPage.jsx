@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
-
+import { MDXProvider } from '@mdx-js/react';
+import { allPosts } from "../../content/posts/index.js";
 const BlogIndexPage = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const sortedPosts = allPosts.sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,25 +15,6 @@ const BlogIndexPage = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/.netlify/functions/getPosts');
-        if (!response.ok) throw new Error('Failed to fetch posts');
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
   }, []);
 
   return (
@@ -62,21 +43,13 @@ const BlogIndexPage = () => {
           <div className="max-w-4xl mx-auto px-4">
             <h1 className="text-4xl font-bold text-white mb-12">Blog Posts</h1>
             
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto"></div>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12 text-red-400">
-                {error}
-              </div>
-            ) : posts.length === 0 ? (
+            {sortedPosts.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
                 No posts found. Check back soon!
               </div>
             ) : (
               <div className="space-y-12">
-                {posts.map((post) => (
+                {sortedPosts.map((post) => (
                   <article key={post.id} className="bg-gray-900 rounded-lg overflow-hidden p-8">
                     <div className="mb-6">
                       <h2 className="text-3xl font-bold text-white mb-3">{post.title}</h2>
@@ -110,9 +83,9 @@ const BlogIndexPage = () => {
                       )}
                     </div>
                     <div className="prose prose-invert max-w-none mb-6">
-                      <ReactMarkdown>
-                        {post.body?.substring(0, 300) + '...'}
-                      </ReactMarkdown>
+                      <MDXProvider>
+                        {post.excerpt || post.description}
+                      </MDXProvider>
                     </div>
                     <Link 
                       to={`/blog/${post.id}`}
