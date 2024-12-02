@@ -1,11 +1,13 @@
----
-title: "Getting Started with React and Vite"
-date: 2024-11-29
-description: "A comprehensive guide to setting up a React project with Vite, exploring the benefits and basic configuration steps."
-tags: ["React", "Vite", "JavaScript", "Web Development"]
-thumbnail: "/images/react-vite.png"
----
+{/* getting-started-with-react-and-vite.mdx */}
+export const meta = {
+  title: "Getting Started with React and Vite",
+  date: new Date("2024-11-29").toISOString(),
+  description: "A comprehensive guide to setting up a React project with Vite, exploring the benefits and basic configuration steps.",
+  tags: ["React", "Vite", "JavaScript", "Web Development"],
+  thumbnail: "/images/react-vite.png"
+}
 
+# Getting Started with React and Vite
 
 React has been the go-to library for building user interfaces for years, and when paired with Vite, it becomes even more powerful. In this post, we'll explore how to set up a React project using Vite and why this combination is becoming increasingly popular among developers.
 
@@ -63,3 +65,11 @@ This post serves as a quick test of our blog's content management system, but it
 - Add TypeScript to your project
 
 Remember to check out the official documentation for both [React](https://reactjs.org) and [Vite](https://vitejs.dev) for more detailed information.
+
+export default function Post({ children }) {
+  return (
+    <div className="prose prose-invert max-w-none">
+      {children}
+    </div>
+  )
+}

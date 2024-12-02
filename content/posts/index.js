@@ -1,14 +1,24 @@
-// content/post/index.js
-import GettingStarted from './getting-started-with-react-and-vite.mdx'
+import { Buffer } from 'buffer'
+globalThis.Buffer = Buffer
 
-export const allPosts = [
-  {
+import GettingStartedPost, { meta as gettingStartedMeta } from './getting-started-with-react-and-vite.mdx'
+
+// Map each post with its metadata and component
+const posts = {
+  'getting-started-with-react-and-vite': {
     id: 'getting-started-with-react-and-vite',
-    title: "Getting Started with React and Vite",
-    date: "2024-11-29",
-    description: "A comprehensive guide to setting up a React project with Vite, exploring the benefits and basic configuration steps.",
-    tags: ["React", "Vite", "JavaScript", "Web Development"],
-    thumbnail: "/images/react-vite.png",
-    component: GettingStarted
+    title: gettingStartedMeta.title,
+    date: new Date(gettingStartedMeta.date).toISOString(),
+    description: gettingStartedMeta.description,
+    tags: gettingStartedMeta.tags,
+    thumbnail: gettingStartedMeta.thumbnail,
+    component: GettingStartedPost
   }
-];
+}
+
+// Export sorted posts array
+export const allPosts = Object.values(posts).sort((a, b) => {
+  const dateA = new Date(a.date);
+  const dateB = new Date(b.date);
+  return dateB - dateA;
+})

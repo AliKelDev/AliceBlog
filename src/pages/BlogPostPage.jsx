@@ -1,5 +1,4 @@
-import { Buffer } from 'buffer';
-globalThis.Buffer = Buffer;
+
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
@@ -27,12 +26,10 @@ const BlogPostPage = () => {
   useEffect(() => {
     if (!id) return;
     
-    // Find post in local content
     const foundPost = allPosts.find(post => post.id === id);
     if (foundPost) {
       setPost(foundPost);
       
-      // Find adjacent posts
       const currentIndex = allPosts.findIndex(post => post.id === id);
       setAdjacentPosts({
         prev: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
@@ -72,6 +69,39 @@ const BlogPostPage = () => {
       </div>
     );
   }
+
+  // Define custom components for MDX
+  const components = {
+    code: ({ children, className, ...props }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      return match ? (
+        <div className="relative">
+          <pre className={className} {...props}>
+            <code className={className} {...props}>
+              {children}
+            </code>
+          </pre>
+        </div>
+      ) : (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
+    },
+    a: ({ href, children, ...props }) => (
+      <a
+        href={href}
+        className="text-blue-400 hover:text-blue-300 underline"
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      >
+        {children}
+      </a>
+    )
+  };
+
+  const PostContent = post.component;
 
   return (
     <>
@@ -150,38 +180,8 @@ const BlogPostPage = () => {
           </header>
 
           <div className="prose prose-invert prose-lg max-w-none">
-            <MDXProvider
-              components={{
-                code: ({ children, className, ...props }) => {
-                  const match = /language-(\w+)/.exec(className || '');
-                  return match ? (
-                    <div className="relative">
-                      <pre className={className} {...props}>
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      </pre>
-                    </div>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  );
-                },
-                a: ({ href, children, ...props }) => (
-                  <a
-                    href={href}
-                    className="text-blue-400 hover:text-blue-300 underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    {...props}
-                  >
-                    {children}
-                  </a>
-                )
-              }}
-            >
-              {post.component}
+            <MDXProvider components={components}>
+              <PostContent />
             </MDXProvider>
           </div>
 
