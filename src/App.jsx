@@ -1,45 +1,27 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { MDXProvider } from '@mdx-js/react';
 import BlogPostPage from './pages/BlogPostPage';
 import BlogIndexPage from './pages/BlogIndexPage';
-import { allPosts } from "../content/posts/index.js";
-
-// Custom hook for intersection observer
-const useInView = (ref) => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting)
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
-    };
-  }, [ref]);
-
-  return isVisible;
-};
+import { getPosts } from "./lib/posts-loader";
 
 // Header Component with scroll effect
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const handleScroll = useCallback(() => {
+    const scrolled = window.scrollY > 50;
+    if (isScrolled !== scrolled) {
+      setIsScrolled(scrolled);
+    }
+  }, [isScrolled]);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const debouncedScroll = debounce(handleScroll, 10);
+    window.addEventListener('scroll', debouncedScroll, { passive: true });
+    return () => window.removeEventListener('scroll', debouncedScroll);
+  }, [handleScroll]);
 
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${
@@ -116,11 +98,9 @@ const BlogPost = ({ post }) => {
   );
 };
 
-// Newsletter Component with animation
+// Newsletter Component
 const Newsletter = () => {
   const [email, setEmail] = useState('');
-  const containerRef = useRef(null);
-  const isVisible = useInView(containerRef);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -129,9 +109,7 @@ const Newsletter = () => {
   };
 
   return (
-    <section ref={containerRef} className={`bg-gradient-to-r from-purple-900 to-blue-900 py-24 transition-all duration-1000 ${
-      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-    }`}>
+    <section className="bg-gradient-to-r from-purple-900 to-blue-900 py-24">
       <div className="max-w-6xl mx-auto px-4 text-center">
         <h2 className="text-3xl font-bold text-white mb-6">Stay Updated</h2>
         <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -163,7 +141,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">About</h3>
-            <p className="text-sm">Web developer and founder of WebPixel, sharing insights about modern web development.</p>
+            <p className="text-sm">Web developer and founder of Pixelle3, sharing insights about modern web development.</p>
           </div>
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">Connect</h3>
@@ -211,11 +189,32 @@ const Footer = () => {
 
 // Main Content Component
 const MainContent = () => {
-  const [posts] = useState(allPosts.sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  ));
-  const postsRef = useRef(null);
-  const isPostsVisible = useInView(postsRef);
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPosts() {
+      setIsLoading(true);
+      try {
+        const allPosts = await getPosts();
+        setPosts(allPosts);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadPosts();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -229,7 +228,7 @@ const MainContent = () => {
               Alice Leiser's Blog
             </h1>
             <p className="text-xl md:text-2xl text-gray-400 max-w-2xl">
-              Web Developer. Founder of WebPixel.
+              Web Developer. Founder of Pixelle3.
               Sharing insights about modern web development.
             </p>
             <div className="pt-8">
@@ -242,7 +241,7 @@ const MainContent = () => {
         </div>
       </section>
 
-      <section id="recent-posts" ref={postsRef} className="bg-black text-white py-24">
+      <section id="recent-posts" className="bg-black text-white py-24">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-12">Latest Articles</h2>
           {posts.length === 0 ? (
@@ -252,14 +251,7 @@ const MainContent = () => {
           ) : (
             <div className="space-y-12">
               {posts.map((post) => (
-                <div 
-                  key={post.id}
-                  className={`transform transition-all duration-500 ${
-                    isPostsVisible 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-10'
-                  }`}
-                >
+                <div key={post.id}>
                   <BlogPost post={post} />
                 </div>
               ))}
@@ -273,6 +265,19 @@ const MainContent = () => {
     </>
   );
 };
+
+// Utility function for debouncing
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 // Main App Component
 const App = () => {

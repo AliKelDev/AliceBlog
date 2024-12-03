@@ -1,5 +1,6 @@
-
-import { useEffect, useState } from 'react';
+import { Buffer } from 'buffer';
+globalThis.Buffer = Buffer;
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
 import { Helmet } from 'react-helmet-async';
@@ -7,38 +8,57 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
 import { Share2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { allPosts } from "../../content/posts/index.js";
+import { getPost, getAdjacentPosts } from '../lib/posts-loader';
 
 const BlogPostPage = () => {
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [adjacentPosts, setAdjacentPosts] = useState({ prev: null, next: null });
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Debounced scroll handler
+  const handleScroll = useCallback(() => {
+    const scrolled = window.scrollY > 50;
+    if (isScrolled !== scrolled) {
+      setIsScrolled(scrolled);
+    }
+  }, [isScrolled]);
 
   useEffect(() => {
-    if (!id) return;
-    
-    const foundPost = allPosts.find(post => post.id === id);
-    if (foundPost) {
-      setPost(foundPost);
+    const debouncedScroll = debounce(handleScroll, 10);
+    window.addEventListener('scroll', debouncedScroll, { passive: true });
+    return () => window.removeEventListener('scroll', debouncedScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    async function loadPost() {
+      if (!id) return;
       
-      const currentIndex = allPosts.findIndex(post => post.id === id);
-      setAdjacentPosts({
-        prev: currentIndex > 0 ? allPosts[currentIndex - 1] : null,
-        next: currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
-      });
+      setIsLoading(true);
+      try {
+        const [postData, adjacentPostsData] = await Promise.all([
+          getPost(id),
+          getAdjacentPosts(id)
+        ]);
+        
+        if (postData) {
+          setPost(postData);
+          setAdjacentPosts(adjacentPostsData);
+        }
+      } catch (error) {
+        console.error('Error loading post:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
+
+    loadPost();
   }, [id]);
 
   const handleShare = async () => {
+    if (!post) return;
+
     const shareData = {
       title: post.title,
       text: post.description,
@@ -57,6 +77,16 @@ const BlogPostPage = () => {
     }
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
+  // Not found state
   if (!post) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -106,9 +136,9 @@ const BlogPostPage = () => {
   return (
     <>
       <Helmet>
-        <title>{post.title || 'Blog Post'} - Alice Leiser's Blog</title>
+        <title>{post.title} - Alice Leiser's Blog</title>
         <meta name="description" content={post.description || ''} />
-        <meta property="og:title" content={post.title || ''} />
+        <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.description || ''} />
         <meta property="og:image" content={post.thumbnail || ''} />
         <meta name="keywords" content={post.tags?.join(', ') || ''} />
@@ -218,5 +248,18 @@ const BlogPostPage = () => {
     </>
   );
 };
+
+// Utility function for debouncing
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 export default BlogPostPage;

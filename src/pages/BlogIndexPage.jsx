@@ -1,21 +1,51 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
-import { allPosts } from "../../content/posts/index.js";
+import { getPosts } from '../lib/posts-loader';
+
 const BlogIndexPage = () => {
+  const [posts, setPosts] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
-  const sortedPosts = allPosts.sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Debounced scroll handler
+  const handleScroll = useCallback(() => {
+    const scrolled = window.scrollY > 50;
+    if (isScrolled !== scrolled) {
+      setIsScrolled(scrolled);
+    }
+  }, [isScrolled]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const debouncedScroll = debounce(handleScroll, 10);
+    window.addEventListener('scroll', debouncedScroll, { passive: true });
+    return () => window.removeEventListener('scroll', debouncedScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    async function loadPosts() {
+      setIsLoading(true);
+      try {
+        const allPosts = await getPosts();
+        setPosts(allPosts);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadPosts();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -43,13 +73,13 @@ const BlogIndexPage = () => {
           <div className="max-w-4xl mx-auto px-4">
             <h1 className="text-4xl font-bold text-white mb-12">Blog Posts</h1>
             
-            {sortedPosts.length === 0 ? (
+            {posts.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
                 No posts found. Check back soon!
               </div>
             ) : (
               <div className="space-y-12">
-                {sortedPosts.map((post) => (
+                {posts.map((post) => (
                   <article key={post.id} className="bg-gray-900 rounded-lg overflow-hidden p-8">
                     <div className="mb-6">
                       <h2 className="text-3xl font-bold text-white mb-3">{post.title}</h2>
@@ -103,5 +133,18 @@ const BlogIndexPage = () => {
     </>
   );
 };
+
+// Utility function for debouncing
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
 export default BlogIndexPage;
