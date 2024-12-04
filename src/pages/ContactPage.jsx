@@ -2,6 +2,144 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Twitter, Briefcase, GraduationCap, Code } from 'lucide-react';
 
+// Animated messages array
+const messages = [
+  "follow me",
+  "i tweet great stuff",
+  "wow moving text wow",
+  "you wonder how many of those i wrote ?",
+  "hahaha",
+  "a lot of them",
+  "more text incoming",
+  "still reading?",
+  "impressive dedication",
+  "did you know...",
+  "scrolling text is fun",
+  "especially when it's random",
+  "like this one",
+  "and this one too",
+  "infinite wisdom ahead",
+  "or maybe not",
+  "keep scrolling",
+  "there's more",
+  "much more",
+  "trust me",
+  "I'm a developer",
+  "beep boop",
+  "loading more text...",
+  "text loaded successfully",
+  "error 404: joke not found",
+  "just kidding",
+  "found it",
+  "or did I?",
+  "mysteries abound",
+  "in scrolling text",
+  "like this one",
+  "and the next one",
+  "recursion is fun",
+  "until it isn't",
+  "stack overflow",
+  "but not that one",
+  "the other one",
+  "you know what I mean",
+  "right?",
+  "...right?",
+  "hello from the other side",
+  "42 messages... the answer to everything", // 42nd message
+  "keep going",
+  "almost there",
+  "well, not really",
+  "still a way to go",
+  "persistence is key",
+  "like this text",
+  "it just keeps going",
+  "and going",
+  "and going...",
+  "insert clever message here",
+  "🚀",
+  "to infinity",
+  "and beyond",
+  "quantum text mechanics",
+  "schrödinger's message",
+  "both here and not here",
+  "until you read it",
+  "then it collapses",
+  "into this one",
+  "or maybe that one",
+  "who knows?",
+  "the text knows",
+  "but it won't tell",
+  "secrets of the scroll",
+  "revealed slowly",
+  "one message at a time",
+  "patience young padawan",
+  "the text is strong with this one",
+  "may the scroll be with you",
+  "always",
+  "void where prohibited",
+  "terms and conditions apply",
+  "batteries not included",
+  "some assembly required",
+  "no purchase necessary",
+  "void where prohibited",
+  "again",
+  "because why not",
+  "recursion strikes back",
+  "return of the text",
+  "a new scroll",
+  "the phantom message",
+  "attack of the scrolls",
+  "revenge of the text",
+  "a new hope",
+  "for more messages",
+  "the scroll awakens",
+  "the last message",
+  "or is it?",
+  "narrator: it wasn't",
+  "plot twist ahead",
+  "or maybe not",
+  "suspense building",
+  "anticipation rising",
+  "almost there",
+  "getting closer",
+  "so close now",
+  "just a few more",
+  "hang in there",
+  "almost done",
+  "thx for reading everything :)", // 99th message
+  "the end" // 100th message
+];
+
+const AnimatedText = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const textInterval = setInterval(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % messages.length);
+        setIsVisible(true);
+      }, 500); // Wait for fade out before changing text
+    }, 3000); // Change message every 3 seconds
+
+    return () => clearInterval(textInterval);
+  }, []);
+
+  return (
+    <div className="h-6 mt-4 text-center">
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-sm text-purple-400"
+      >
+        {messages[currentIndex]}
+      </motion.p>
+    </div>
+  );
+};
+
 const ParticleBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -151,24 +289,27 @@ const ContactPage = () => {
             </div>
           </ExpandableCard>
 
-          {/* Social Links */}
-          <div className="flex justify-center gap-6 pt-8">
-            <a
-              href="https://github.com/AliKelDev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-4 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              <Github className="w-6 h-6" />
-            </a>
-            <a
-              href="https://x.com/AliLeisR"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-4 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              <Twitter className="w-6 h-6" />
-            </a>
+          {/* Social Links with Animated Text */}
+          <div className="flex flex-col items-center pt-8">
+            <div className="flex justify-center gap-6 mb-2">
+              <a
+                href="https://github.com/AliKelDev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <Github className="w-6 h-6" />
+              </a>
+              <a
+                href="https://x.com/AliLeisR"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <Twitter className="w-6 h-6" />
+              </a>
+            </div>
+            <AnimatedText />
           </div>
         </div>
       </section>
