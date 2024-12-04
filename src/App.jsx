@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { MDXProvider } from '@mdx-js/react';
 import BlogPostPage from './pages/BlogPostPage';
 import BlogIndexPage from './pages/BlogIndexPage';
+import ContactPage from './pages/ContactPage';  // Add this import
 import { getPosts } from "./lib/posts-loader";
 
 // Header Component with scroll effect
@@ -288,10 +289,13 @@ const App = () => {
           <Route path="/" element={<MainContent />} />
           <Route path="/blog" element={<BlogIndexPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
+          <Route path="/contact" element={<ContactPage />} />  {/* Add this route */}
         </Routes>
       </Router>
     </HelmetProvider>
   );
 };
+
+
 
 export default App;
