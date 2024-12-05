@@ -34,8 +34,8 @@ A modern blog platform designed with React and animations, providing a sleek and
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YourUsername/pixelle3-blog.git
-   cd pixelle3-blog
+   git clone https://github.com/YourUsername/AliceBlog
+   cd AliceBlog
    ```
 
 2. Install dependencies:
@@ -54,11 +54,7 @@ A modern blog platform designed with React and animations, providing a sleek and
 
 ```
 src/
-├── components/
-│   ├── Header.js
-│   ├── BlogPost.js
-│   ├── Newsletter.js
-│   └── Footer.js
+│ 
 ├── pages/
 │   ├── BlogIndexPage.js
 │   ├── BlogPostPage.js
