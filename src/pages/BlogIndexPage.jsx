@@ -5,8 +5,10 @@ import { MDXProvider } from '@mdx-js/react';
 import { motion } from 'framer-motion';
 import { getPosts } from '../lib/posts-loader';
 import { ChevronRight } from 'lucide-react';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 const BlogIndexPage = () => {
+  useScrollToTop();
   const [posts, setPosts] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

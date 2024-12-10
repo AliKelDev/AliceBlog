@@ -8,6 +8,7 @@ import BlogPostPage from './pages/BlogPostPage';
 import BlogIndexPage from './pages/BlogIndexPage';
 import ContactPage from './pages/ContactPage';
 import { getPosts } from "./lib/posts-loader";
+import useScrollToTop from './hooks/useScrollToTop';
 
 // Enhanced Header Component with animations
 const Header = () => {
@@ -316,6 +317,7 @@ const Footer = () => {
 
 // Enhanced MainContent Component
 const MainContent = () => {
+  useScrollToTop();
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState(0);

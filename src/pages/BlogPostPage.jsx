@@ -9,8 +9,10 @@ import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
 import { Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getPost, getAdjacentPosts } from '../lib/posts-loader';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 const BlogPostPage = () => {
+  useScrollToTop();
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
