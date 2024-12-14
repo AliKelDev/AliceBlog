@@ -1,0 +1,189 @@
+---
+title: "Build Your Professional Website: A No-Nonsense Guide"
+date: "2024-12-14"
+description: "Transform a modern React template into your professional website - complete with slick gradients, smooth animations, and zero hassle deployment. Perfect for beginners!"
+tags: ["React", "Web Development", "GitHub", "Netlify", "Portfolio"]
+thumbnail: "/website-creation-thumbnail.jpeg"
+series: "Web Development Tutorials"
+seriesOrder: 1
+---
+
+# Build Your Professional Website: A No-Nonsense Guide
+
+Hey there! Looking to get your professional website up and running without the usual headaches? I've got you covered. I'll walk you through using my React template to create something that looks great and works even better. The best part? It's free, and you'll have something unique to show off in no time.
+
+Before we start, you can see exactly what we're building in the [live demo](https://react-vite-alikeldev.netlify.app/). Go ahead, click around and get a feel for it!
+
+## What You'll Need
+
+Before we dive in, let's make sure you have everything ready:
+
+- A computer with internet connection
+- About 30 minutes of your time (we'll go nice and slow)
+- A cup of your favorite beverage (optional but recommended)
+
+Don't worry if you're new to web development - I'll explain everything step by step!
+
+## Setting Up Your Development Environment
+
+First, we need to set up your computer for web development. Don't worry, it's easier than it sounds!
+
+1. **Install Node.js**
+   - Visit [nodejs.org](https://nodejs.org)
+   - Click the big green button that says "LTS" (this means "Long Term Support" - it's the stable version)
+   - Once downloaded, run the installer
+   - Click "Next" through the installation (the default settings are perfect)
+   - To check if it worked, open your computer's terminal (Command Prompt on Windows, Terminal on Mac) and type: `node --version`
+   - If you see a number like `v18.x.x`, you're good to go!
+
+2. **Install Visual Studio Code**
+   - This is where you'll write your code
+   - Go to [code.visualstudio.com](https://code.visualstudio.com)
+   - Download and install it just like Node.js
+   - Open it up - this will be your new favorite program!
+
+## Creating Your GitHub Account
+
+GitHub is where we'll store your website's code. Think of it like Google Drive, but for code.
+
+1. **Sign Up for GitHub**
+   - Visit [GitHub.com](https://github.com)
+   - Click the "Sign Up" button in the top right
+   - Follow the signup process - you'll need:
+     - An email address
+     - A username (pick something professional - people might see this!)
+     - A password
+   - Verify your email address when GitHub sends you a message
+
+2. **Get My Template**
+   - While logged into GitHub, visit my [template repository](https://github.com/AliKelDev/ReactViteTemplate)
+   - Look for the "Fork" button in the top right (it's next to a number)
+   - Click it, and you'll see a "Create Fork" page
+   - Name your repository something like "my-website" or "portfolio"
+   - Click "Create fork"
+   - Congratulations! You now have your own copy of the template
+
+## Setting Up Your Local Development Environment
+
+Now we'll get the code onto your computer and running:
+
+1. **Install Git**
+   - Go to [git-scm.com](https://git-scm.com)
+   - Download and install Git for your operating system
+   - During installation, just keep clicking "Next" (the defaults are fine)
+
+2. **Get the Code on Your Computer**
+   - Open Visual Studio Code
+   - Press Ctrl + ` (the key above Tab) to open the terminal
+   - Copy and paste these commands one at a time:
+
+```bash
+# Replace YOUR-USERNAME with your GitHub username
+git clone https://github.com/AliKelDev/ReactViteTemplate
+cd ReactViteTemplate
+npm install
+npm run dev
+```
+
+If everything worked, you should see a message with a URL (usually `http://localhost:5173`). Open that in your web browser, and you'll see your website running locally!
+
+## Customizing Your Website
+
+Now for the fun part - making it yours! Open these files in Visual Studio Code:
+
+1. **Update Your Information** (in `src/components/HomePage.jsx`)
+   - Find the projects section (I'll show you what it looks like below)
+   - Replace my information with yours
+   - Don't worry about breaking anything - you can always restore the file from GitHub if needed
+
+```javascript
+const projects = [
+  {
+    title: "Your Project Name", // Change this!
+    client: "Your Name", // And this!
+    description: "Write what you did here", // Make it sound awesome
+    technologies: [
+      { title: "What you used", desc: "Brief description" }
+    ],
+    previewUrl: "your-url-here" // Add a link if you have one
+  }
+  // Add more projects by copying this whole block
+];
+```
+
+2. **Change Colors and Styling**
+   Want different colors? Open `tailwind.config.js` and look for something like this:
+
+```javascript
+theme: {
+  extend: {
+    colors: {
+      primary: "...", // Your main color
+      secondary: "..." // Your accent color
+    }
+  }
+}
+```
+
+3. **Add Your Own Content**
+   - All the main content is in `src/components/HomePage.jsx`
+   - Look for text you want to change and update it
+   - Save the file and watch your browser automatically update!
+
+## Getting Your Site Online
+
+Ready to show your site to the world? Let's put it on the internet:
+
+1. **Sign Up for Netlify**
+   - Go to [Netlify.com](https://netlify.com)
+   - Click "Sign Up"
+   - Choose "Sign up with GitHub" (this makes everything easier)
+   - Give Netlify permission to access your GitHub
+
+2. **Deploy Your Site**
+   - In Netlify, click "Add new site" → "Import an existing project"
+   - Choose your website's repository from the list
+   - Keep all the settings as they are
+   - Click "Deploy site"
+   - Wait a few minutes, and your site will be live!
+
+3. **Get a Nice URL**
+   - Netlify gives you a random URL like `happy-penguin-123456.netlify.app`
+   - To change it:
+     - Go to "Site settings"
+     - Click "Change site name"
+     - Pick something you like (like `your-name-portfolio`)
+
+## Need More Help?
+
+- Check out the full [GitHub repository](https://github.com/AliKelDev/ReactViteTemplate) for detailed documentation
+- Follow me on [Twitter](https://x.com/AliLeisR) for updates and tips
+- Want something more custom? Check out my [professional web development services](https://webpixelle3.netlify.app/)
+
+## Pro Tips for Beginners
+
+1. **Take It Slow**: Don't worry about understanding everything at first. Start with small changes and build up
+2. **Test Everything**: After each change, check your site in the browser
+3. **Save Often**: In Visual Studio Code, press Ctrl+S (or Cmd+S on Mac) frequently to save your changes
+4. **Ask for Help**: If you get stuck, the web development community is super friendly!
+
+## Contributing
+
+Found a bug? Want to add a feature? Contributions are always welcome! Head over to the [GitHub repo](https://github.com/AliKelDev/ReactViteTemplate) and submit a pull request.
+
+## Show Some Love
+
+If this template helps you out, consider:
+- Giving it a star on [GitHub](https://github.com/AliKelDev/ReactViteTemplate)
+- Sharing it with others who might find it useful
+- Following me on [Twitter](https://x.com/AliLeisR) for more web dev content
+
+Made with ❤️ by Alice Leiser
+
+export default function Post({ children }) {
+  return (
+    <div className="prose prose-invert max-w-none">
+      {children}
+    </div>
+  );
+}
