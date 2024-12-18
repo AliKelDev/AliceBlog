@@ -1,4 +1,3 @@
-// src/utils/search.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { checkForEasterEgg } from './easterEggs';
@@ -10,18 +9,17 @@ export const searchPosts = async (query, posts) => {
   if (!searchQuery) return posts;
 
   return posts.filter(post => {
-    const titleMatch = post.frontmatter.title.toLowerCase().includes(searchQuery);
-    const descriptionMatch = post.frontmatter.description?.toLowerCase().includes(searchQuery);
-    const contentMatch = post.compiledContent?.toLowerCase().includes(searchQuery);
-    const tagMatch = post.frontmatter.tags?.some(tag => 
+    const titleMatch = post.title?.toLowerCase().includes(searchQuery);
+    const descriptionMatch = post.description?.toLowerCase().includes(searchQuery);
+    const tagMatch = post.tags?.some(tag => 
       tag.toLowerCase().includes(searchQuery)
     );
 
-    return titleMatch || descriptionMatch || contentMatch || tagMatch;
+    return titleMatch || descriptionMatch || tagMatch;
   });
 };
 
-// SearchBar component
+// SearchBar component remains the same
 export const SearchBar = ({ 
   onSearch, 
   initialQuery = '', 
@@ -47,14 +45,12 @@ export const SearchBar = ({
   const handleSearch = async (searchQuery) => {
     setIsLoading(true);
     try {
-      // Check for easter eggs before performing the search
+      // First, perform the regular search - this should always happen
+      await onSearch(searchQuery);
+      
+      // Then check for easter eggs independently
       const easterEggResult = checkForEasterEgg(searchQuery);
       setEasterEgg(easterEggResult.found ? easterEggResult : null);
-      
-      // Only perform the actual search if there's no easter egg
-      if (!easterEggResult.found) {
-        await onSearch(searchQuery);
-      }
     } catch (error) {
       console.error('Search error:', error);
     } finally {
@@ -153,30 +149,5 @@ export const SearchBar = ({
     </div>
   );
 };
-
-// Add the fadeIn animation style
-const styles = `
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-in;
-}
-`;
-
-// Add the styles to the document
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
-}
 
 export default SearchBar;
