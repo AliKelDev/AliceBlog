@@ -1,0 +1,25 @@
+# https://aliceleiserblog.netlify.app/robots.txt
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/*
+Allow: /contact
+
+# Sitemap
+Sitemap: https://aliceleiserblog.netlify.app/sitemap.xml
+
+# Protect development/system files
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.js$
+Disallow: /*.json$
+Disallow: /_next/
+Disallow: /*/_next/
+Disallow: /*/*/_next/
+Disallow: /static/
+Disallow: /*.mdx$
+
+# Prevent crawling of error pages and search results
+Disallow: /404
+Disallow: /error
+Disallow: /*?*

@@ -2,17 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Update the href to point to the favicon.svg file -->
+    <!-- Meta description for search engines -->
+    <meta name="description" content="Alice Leiser's Tech Blog - Exploring web development, programming tips, and tech insights. Join me on my journey through the world of technology." />
+    
+    <!-- Additional meta tags for better SEO -->
+    <meta name="author" content="Alice Leiser" />
+    <meta name="keywords" content="tech blog, web development, programming, technology, coding tips" />
+    
+    <!-- Open Graph meta tags for social media sharing -->
+    <meta property="og:title" content="Alice Leiser's Tech Blog" />
+    <meta property="og:description" content="Exploring web development, programming tips, and tech insights. Join me on my journey through the world of technology." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://aliceleiserblog.netlify.app/" />
+    
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Alice Leiser's Tech Blog" />
+    <meta name="twitter:description" content="Exploring web development, programming tips, and tech insights." />
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alice Leisers Blog</title>
-    <!-- Add this line for Netlify Identity -->
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    
+    <!-- Title -->
+    <title>Alice Leiser's Tech Blog</title>
+    
+    <!-- Netlify Identity -->
+    <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <!-- Add this script block for Netlify Identity redirect -->
     <script>
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("init", user => {
