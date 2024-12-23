@@ -1,118 +1,118 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Twitter, Briefcase, GraduationCap, Code } from 'lucide-react';
-
-// Animated messages array
-const messages = [
-  "follow me",
-  "i tweet great stuff",
-  "wow moving text wow",
-  "you wonder how many of those i wrote ?",
-  "hahaha",
-  "a lot of them",
-  "more text incoming",
-  "still reading?",
-  "impressive dedication",
-  "did you know...",
-  "scrolling text is fun",
-  "especially when it's random",
-  "like this one",
-  "and this one too",
-  "infinite wisdom ahead",
-  "or maybe not",
-  "keep scrolling",
-  "there's more",
-  "much more",
-  "trust me",
-  "I'm a developer",
-  "beep boop",
-  "loading more text...",
-  "text loaded successfully",
-  "error 404: joke not found",
-  "just kidding",
-  "found it",
-  "or did I?",
-  "mysteries abound",
-  "in scrolling text",
-  "like this one",
-  "and the next one",
-  "recursion is fun",
-  "until it isn't",
-  "stack overflow",
-  "but not that one",
-  "the other one",
-  "you know what I mean",
-  "right?",
-  "...right?",
-  "hello from the other side",
-  "42 messages... the answer to everything", // 42nd message
-  "keep going",
-  "almost there",
-  "well, not really",
-  "still a way to go",
-  "persistence is key",
-  "like this text",
-  "it just keeps going",
-  "and going",
-  "and going...",
-  "insert clever message here",
-  "🚀",
-  "to infinity",
-  "and beyond",
-  "quantum text mechanics",
-  "schrödinger's message",
-  "both here and not here",
-  "until you read it",
-  "then it collapses",
-  "into this one",
-  "or maybe that one",
-  "who knows?",
-  "the text knows",
-  "but it won't tell",
-  "secrets of the scroll",
-  "revealed slowly",
-  "one message at a time",
-  "patience young padawan",
-  "the text is strong with this one",
-  "may the scroll be with you",
-  "always",
-  "void where prohibited",
-  "terms and conditions apply",
-  "batteries not included",
-  "some assembly required",
-  "no purchase necessary",
-  "void where prohibited",
-  "again",
-  "because why not",
-  "recursion strikes back",
-  "return of the text",
-  "a new scroll",
-  "the phantom message",
-  "attack of the scrolls",
-  "revenge of the text",
-  "a new hope",
-  "for more messages",
-  "the scroll awakens",
-  "the last message",
-  "or is it?",
-  "narrator: it wasn't",
-  "plot twist ahead",
-  "or maybe not",
-  "suspense building",
-  "anticipation rising",
-  "almost there",
-  "getting closer",
-  "so close now",
-  "just a few more",
-  "hang in there",
-  "almost done",
-  "thx for reading everything :)", // 99th message
-  "the end" // 100th message
-];
+import { Github, Twitter, Briefcase, GraduationCap, Code, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const AnimatedText = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+
+  const messages = [
+    "follow me",
+    "i tweet great stuff",
+    "wow moving text wow",
+    "you wonder how many of those i wrote ?",
+    "hahaha",
+    "a lot of them",
+    "more text incoming",
+    "still reading?",
+    "impressive dedication",
+    "did you know...",
+    "scrolling text is fun",
+    "especially when it's random",
+    "like this one",
+    "and this one too",
+    "infinite wisdom ahead",
+    "or maybe not",
+    "keep scrolling",
+    "there's more",
+    "much more",
+    "trust me",
+    "I'm a developer",
+    "beep boop",
+    "loading more text...",
+    "text loaded successfully",
+    "error 404: joke not found",
+    "just kidding",
+    "found it",
+    "or did I?",
+    "mysteries abound",
+    "in scrolling text",
+    "like this one",
+    "and the next one",
+    "recursion is fun",
+    "until it isn't",
+    "stack overflow",
+    "but not that one",
+    "the other one",
+    "you know what I mean",
+    "right?",
+    "...right?",
+    "hello from the other side",
+    "42 messages... the answer to everything",
+    "keep going",
+    "almost there",
+    "well, not really",
+    "still a way to go",
+    "persistence is key",
+    "like this text",
+    "it just keeps going",
+    "and going",
+    "and going...",
+    "insert clever message here",
+    "🚀",
+    "to infinity",
+    "and beyond",
+    "quantum text mechanics",
+    "schrödinger's message",
+    "both here and not here",
+    "until you read it",
+    "then it collapses",
+    "into this one",
+    "or maybe that one",
+    "who knows?",
+    "the text knows",
+    "but it won't tell",
+    "secrets of the scroll",
+    "revealed slowly",
+    "one message at a time",
+    "patience young padawan",
+    "the text is strong with this one",
+    "may the scroll be with you",
+    "always",
+    "void where prohibited",
+    "terms and conditions apply",
+    "batteries not included",
+    "some assembly required",
+    "no purchase necessary",
+    "void where prohibited",
+    "again",
+    "because why not",
+    "recursion strikes back",
+    "return of the text",
+    "a new scroll",
+    "the phantom message",
+    "attack of the scrolls",
+    "revenge of the text",
+    "a new hope",
+    "for more messages",
+    "the scroll awakens",
+    "the last message",
+    "or is it?",
+    "narrator: it wasn't",
+    "plot twist ahead",
+    "or maybe not",
+    "suspense building",
+    "anticipation rising",
+    "almost there",
+    "getting closer",
+    "so close now",
+    "just a few more",
+    "hang in there",
+    "almost done",
+    "thx for reading everything :)",
+    "the end"
+  ];
 
   useEffect(() => {
     const textInterval = setInterval(() => {
@@ -120,8 +120,8 @@ const AnimatedText = () => {
       setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % messages.length);
         setIsVisible(true);
-      }, 500); // Wait for fade out before changing text
-    }, 3000); // Change message every 3 seconds
+      }, 500);
+    }, 3000);
 
     return () => clearInterval(textInterval);
   }, []);
@@ -188,8 +188,115 @@ const ExpandableCard = ({ title, icon: Icon, children }) => {
 };
 
 const ContactPage = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    document.body.style.overflow = !isMenuOpen ? 'hidden' : 'auto';
+  };
+
   return (
     <div className="min-h-screen bg-black text-white relative">
+      {/* Navigation Overlay */}
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+          onClick={() => {
+            setIsMenuOpen(false);
+            document.body.style.overflow = 'auto';
+          }}
+        />
+      )}
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 w-full z-50">
+        <div className="bg-black/90 backdrop-blur-lg border-b border-gray-800">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex justify-between items-center h-16">
+              {/* Logo */}
+              <Link to="/" className="text-xl font-bold text-white">
+                AL
+              </Link>
+
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex space-x-8">
+                <Link to="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
+                </Link>
+                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+                  Blog
+                </Link>
+                <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">
+                  Contact
+                </Link>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={toggleMenu}
+                className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none"
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation - Slide from right */}
+        <div 
+          className={`fixed top-0 right-0 h-full w-64 bg-black/95 transform transition-transform duration-300 ease-in-out z-50 ${
+            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Mobile Menu Header */}
+          <div className="flex justify-between items-center h-16 px-4 border-b border-gray-800">
+            <span className="text-xl font-bold text-white">Menu</span>
+            <button
+              onClick={toggleMenu}
+              className="p-2 text-gray-300 hover:text-white focus:outline-none"
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Mobile Menu Links */}
+          <div className="px-4 py-6 space-y-6">
+            <Link 
+              to="/" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/blog" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Blog
+            </Link>
+            <Link 
+              to="/contact" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Contact
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       <ParticleBackground />
       
       {/* Hero Section */}
@@ -292,7 +399,7 @@ const ContactPage = () => {
           {/* Social Links with Animated Text */}
           <div className="flex flex-col items-center pt-8">
             <div className="flex justify-center gap-6 mb-2">
-              <a
+            <a
                 href="https://github.com/AliKelDev"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -313,6 +420,60 @@ const ContactPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Add custom styles for animations */}
+      <style>{`
+        @keyframes sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+        
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-float-delayed {
+          animation: float-delayed 8s ease-in-out infinite;
+        }
+        
+        .animate-gradient {
+          animation: gradient 8s linear infinite;
+          background-size: 200% auto;
+        }
+        
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        .typing-effect {
+          border-right: 2px solid transparent;
+          animation: typing 3s steps(40, end), blink .75s step-end infinite;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+        
+        @keyframes typing {
+          from { width: 0 }
+          to { width: 100% }
+        }
+        
+        @keyframes blink {
+          from, to { border-color: transparent }
+          50% { border-color: rgba(139, 92, 246, 0.5) }
+        }
+      `}</style>
     </div>
   );
 };

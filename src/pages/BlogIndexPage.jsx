@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Menu, X } from 'lucide-react';
 import { getPosts } from '../lib/posts-loader';
 import { SearchBar, searchPosts } from '../utils/search';
 import useScrollToTop from '../hooks/useScrollToTop';
@@ -15,7 +15,13 @@ const BlogIndexPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const initialQuery = searchParams.get('q') || '';
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    document.body.style.overflow = !isMenuOpen ? 'hidden' : 'auto';
+  };
 
   // Debounced scroll handler
   const handleScroll = useCallback(() => {
@@ -89,6 +95,106 @@ const BlogIndexPage = () => {
         <meta name="description" content="Read the latest articles about web development and tech insights." />
       </Helmet>
 
+      {/* Navigation Overlay */}
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+          onClick={() => {
+            setIsMenuOpen(false);
+            document.body.style.overflow = 'auto';
+          }}
+        />
+      )}
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 w-full z-50">
+        <div className="bg-black/90 backdrop-blur-lg border-b border-gray-800">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex justify-between items-center h-16">
+              {/* Logo */}
+              <Link to="/" className="text-xl font-bold text-white">
+                AL
+              </Link>
+
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex space-x-8">
+                <Link to="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
+                </Link>
+                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+                  Blog
+                </Link>
+                <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">
+                  Contact
+                </Link>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={toggleMenu}
+                className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none"
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation - Slide from right */}
+        <div 
+          className={`fixed top-0 right-0 h-full w-64 bg-black/95 transform transition-transform duration-300 ease-in-out z-50 ${
+            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Mobile Menu Header */}
+          <div className="flex justify-between items-center h-16 px-4 border-b border-gray-800">
+            <span className="text-xl font-bold text-white">Menu</span>
+            <button
+              onClick={toggleMenu}
+              className="p-2 text-gray-300 hover:text-white focus:outline-none"
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Mobile Menu Links */}
+          <div className="px-4 py-6 space-y-6">
+            <Link 
+              to="/" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/blog" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Blog
+            </Link>
+            <Link 
+              to="/contact" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Contact
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Animated background elements */}
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-black pointer-events-none" />
@@ -96,23 +202,6 @@ const BlogIndexPage = () => {
         <div className="absolute top-1/4 right-10 w-24 h-24 bg-purple-500/10 rounded-full blur-xl animate-float" />
         <div className="absolute bottom-1/4 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-xl animate-float-delayed" />
       </div>
-
-      {/* Header */}
-      <header className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-black/90 backdrop-blur-sm py-4' : 'bg-transparent py-6'
-      }`}>
-        <nav className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <Link to="/" className="text-white text-xl font-bold relative group">
-            <span className="relative z-10">AL</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/50 to-blue-500/0 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-300" />
-          </Link>
-          <div className="flex gap-8 text-gray-300">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/blog">Blog</NavLink>
-            <NavLink to="/contact">Contact</NavLink>
-          </div>
-        </nav>
-      </header>
 
       {/* Main Content */}
       <main className="relative z-10 pt-32 pb-24">
@@ -264,16 +353,5 @@ const BlogIndexPage = () => {
     </div>
   );
 };
-
-// Helper NavLink component
-const NavLink = ({ to, children }) => (
-  <Link
-    to={to}
-    className="relative group"
-  >
-    <span className="relative z-10 hover:text-white transition-colors">{children}</span>
-    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 group-hover:w-full transition-all duration-300" />
-  </Link>
-);
 
 export default BlogIndexPage;

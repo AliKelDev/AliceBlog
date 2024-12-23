@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Twitter, ArrowDown } from 'lucide-react';
+import { Github, Twitter, ArrowDown, Menu, X } from 'lucide-react';
 import { MDXProvider } from '@mdx-js/react';
 import { Link } from 'react-router-dom';
 import { getPosts } from "../lib/posts-loader";
@@ -234,6 +234,12 @@ const HomePage = () => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    document.body.style.overflow = !isMenuOpen ? 'hidden' : 'auto';
+  };
 
   useEffect(() => {
     async function loadPosts() {
@@ -287,8 +293,109 @@ const HomePage = () => {
 
   return (
     <>
+      {/* Navigation Overlay */}
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+          onClick={() => {
+            setIsMenuOpen(false);
+            document.body.style.overflow = 'auto';
+          }}
+        />
+      )}
+
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 w-full z-50">
+        <div className="bg-black/90 backdrop-blur-lg border-b border-gray-800">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex justify-between items-center h-16">
+              {/* Logo */}
+              <Link to="/" className="text-xl font-bold text-white">
+                AL
+              </Link>
+
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex space-x-8">
+                <Link to="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
+                </Link>
+                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+                  Blog
+                </Link>
+                <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">
+                  Contact
+                </Link>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={toggleMenu}
+                className="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none"
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Navigation - Slide from right */}
+        <div 
+          className={`fixed top-0 right-0 h-full w-64 bg-black/95 transform transition-transform duration-300 ease-in-out z-50 ${
+            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Mobile Menu Header */}
+          <div className="flex justify-between items-center h-16 px-4 border-b border-gray-800">
+            <span className="text-xl font-bold text-white">Menu</span>
+            <button
+              onClick={toggleMenu}
+              className="p-2 text-gray-300 hover:text-white focus:outline-none"
+              aria-label="Close menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Mobile Menu Links */}
+          <div className="px-4 py-6 space-y-6">
+            <Link 
+              to="/" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/blog" 
+              className="block text-lg text-gray-300
+              hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Blog
+            </Link>
+            <Link 
+              to="/contact" 
+              className="block text-lg text-gray-300 hover:text-white transition-colors"
+              onClick={() => {
+                setIsMenuOpen(false);
+                document.body.style.overflow = 'auto';
+              }}
+            >
+              Contact
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section with enhanced visuals */}
-      <section className="min-h-screen bg-black text-white flex items-center relative overflow-hidden">
+      <section className="min-h-screen pt-16 bg-black text-white flex items-center relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-black" />
