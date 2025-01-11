@@ -1,5 +1,5 @@
 
-# Pixelle3 Blog Platform
+# Blog Platform
 
 A modern blog platform designed with React and animations, providing a sleek and interactive experience for web development enthusiasts. This project showcases responsive design, smooth transitions, and dynamic content loading, all powered by cutting-edge web technologies.
 
